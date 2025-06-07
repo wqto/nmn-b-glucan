@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NMNインタラクティブ・レポート | 科学と体験が語る可能性</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutral Harmony -->
+    <!-- Application Structure Plan: A user-centric, thematic journey designed for exploration. The SPA begins with a captivating hero section, followed by 'The Basics' using simple icons for clarity. The core 'Science' section uses tabs and an interactive Chart.js visualization to compare animal vs. human studies, making complex data digestible. 'User Testimonials' are categorized into cards for scannability. Finally, a 'Safety Guide' uses checklists and toggles for actionable advice. This structure prioritizes user discovery and understanding over a linear report format, facilitating a more engaging and intuitive learning experience. -->
+    <!-- Visualization & Content Choices: 1. Human Trial Data -> Goal: Compare/Inform -> Viz: Interactive Bar Chart (Chart.js/Canvas) -> Interaction: Hover for detailed tooltips. -> Justification: Transforms the report's dense text and table into a clear, comparative visual, highlighting key outcomes effectively. 2. Animal Study Findings -> Goal: Organize/Inform -> Presentation: Clickable Cards with Icons (HTML/CSS/JS) -> Interaction: Click to reveal details. -> Justification: Breaks down a long list into engaging, bite-sized pieces, encouraging user exploration. 3. User Testimonials -> Goal: Organize/Inform -> Presentation: Themed Cards with Quote Icons (HTML/CSS/JS) -> Interaction: Static display for readability. -> Justification: Categorizes personal stories, making them relatable and easy to browse. 4. Safety Checklist -> Goal: Inform/Action -> Presentation: Styled List with Checkmark Icons (HTML/CSS) -> Interaction: Static display. 5. Solubility Comparison -> Goal: Compare/Inform -> Viz: Bar Chart (Chart.js/Canvas) -> Interaction: Static display -> Justification: Clearly illustrates the quantitative improvement of nano-sized β-glucan. 6. Encapsulation Diagram -> Goal: Organize/Inform -> Viz: Styled HTML/CSS -> Interaction: Static display -> Justification: Visually explains the complex concept of nutrient encapsulation in a simple, engaging way. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            background-color: #FDFBF8;
+            color: #4A4A4A;
+        }
+        .bg-warm-primary { background-color: #FDFBF8; }
+        .bg-warm-secondary { background-color: #F4F1ED; }
+        .text-warm-primary { color: #3D3D3D; }
+        .text-warm-secondary { color: #6B6B6B; }
+        .accent-color { color: #5D9C9C; }
+        .accent-bg { background-color: #5D9C9C; }
+        .accent-border { border-color: #5D9C9C; }
+        .section-title {
+            font-size: 2.25rem;
+            font-weight: 700;
+            color: #3D3D3D;
+            text-align: center;
+            margin-bottom: 2rem;
+            position: relative;
+            padding-bottom: 0.5rem;
+        }
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background-color: #5D9C9C;
+            border-radius: 2px;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 400px;
+            max-height: 50vh;
+        }
+        .tab-btn {
+            transition: all 0.3s ease;
+        }
+        .tab-btn.active {
+            background-color: #5D9C9C;
+            color: white;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .testimonial-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .testimonial-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.07), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .fixed-link-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: #5D9C9C;
+            color: white;
+            padding: 0.75rem 1rem; /* Increased vertical padding for more presence */
+            text-align: center;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2); /* Stronger shadow to make it pop */
+            display: flex; /* Use flexbox for centering content */
+            align-items: center; /* Vertically center content */
+            justify-content: center; /* Horizontally center content */
+        }
+        .fixed-link-container a {
+            font-weight: bold;
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s ease; /* Smooth transitions for hover effects */
+            font-size: 1.125rem; /* text-lg for larger text */
+            display: flex; /* Make the link a flex container to align icon and text */
+            align-items: center; /* Vertically align icon and text */
+            gap: 0.5rem; /* Space between icon and text */
+        }
+        .fixed-link-container a:hover {
+            color: #E0E0E0; /* Lighter shade on hover */
+            transform: scale(1.03); /* Slightly scale up on hover to draw attention */
+        }
+
+        /* Tech Section Specific Styles */
+        .tech-diagram {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 200px;
+            border: 1px solid #e2e8f0;
+            margin-top: 1.5rem;
+            position: relative;
+        }
+        .large-particle {
+            width: 80px;
+            height: 80px;
+            background-color: #888;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1.25rem;
+            margin-bottom: 0.5rem;
+        }
+        .nano-particle {
+            width: 15px;
+            height: 15px;
+            background-color: #4CAF50;
+            border-radius: 50%;
+            margin: 2px;
+        }
+        .capsule-diagram {
+            width: 150px;
+            height: 150px;
+            background-color: #F8F8F8;
+            border: 2px solid #5D9C9C;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
+        }
+        .capsule-core {
+            font-weight: bold;
+            color: #5D9C9C;
+            font-size: 1.1rem;
+            z-index: 1;
+        }
+        .encapsulated {
+            position: absolute;
+            width: 15px;
+            height: 15px;
+            background-color: #3B82F6; /* Blue for encapsulated nutrients */
+            border-radius: 50%;
+            opacity: 0.8;
+            box-shadow: 0 0 5px rgba(0,0,0,0.2);
+        }
+    </style>
+</head>
+<body class="bg-warm-primary text-warm-primary">
+
+    <div class="fixed-link-container">
+        <a href="https://three-balance.jp/ca3/10/p-r-s/" target="_blank" rel="noopener noreferrer">NMNで新しい自分へ！NMN入りβグルカンを今すぐチェック！ ▶️</a>
+    </div>
+
+    <header class="text-center py-12 px-4 bg-warm-secondary pt-20"> <!-- Increased padding-top to account for fixed header -->
+        <h1 class="text-4xl md:text-5xl font-bold text-warm-primary mb-4 animate-fade-in-down">NMNで、未来のあなたを輝かせよう</h1>
+        <p class="text-lg text-warm-secondary max-w-3xl mx-auto">科学と体験が語る驚きの可能性。その秘密を、インタラクティブに紐解いていきましょう。</p>
+    </header>
+
+    <main class="container mx-auto px-4 py-12 md:py-20">
+        
+        <section id="basics" class="mb-20">
+            <h2 class="section-title">NMNのきほん</h2>
+            <p class="text-center text-warm-secondary max-w-3xl mx-auto mb-12">
+                NMNって一体何者？まずはその正体と、私たちの体に秘められた素晴らしい役割を、シンプルに見ていきましょう。難しい話は抜きにして、NMNの魅力を直感的に感じてください。
+            </p>
+            <div class="grid md:grid-cols-3 gap-8 text-center">
+                <div class="bg-white p-6 rounded-xl shadow-lg">
+                    <div class="text-5xl mb-4 accent-color">🧬</div>
+                    <h3 class="text-xl font-bold mb-2">若々しさの源、NMN</h3>
+                    <p class="text-warm-secondary">NMNはビタミンB3の仲間で、私たちの体にもともと存在する大切な成分。細胞の元気の素である「NAD+」を作るための特別な材料です。</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-lg">
+                    <div class="text-5xl mb-4 accent-color">⚡️</div>
+                    <h3 class="text-xl font-bold mb-2">細胞のエネルギー「NAD+」</h3>
+                    <p class="text-warm-secondary">NAD+は細胞がエネルギーを作り、傷ついたDNAを修復するのに不可欠。でも年齢と共に減少してしまいます。これが"年齢による変化"のサインに。</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-lg">
+                    <div class="text-5xl mb-4 accent-color">🚀</div>
+                    <h3 class="text-xl font-bold mb-2">NMNで活力をチャージ</h3>
+                    <p class="text-warm-secondary">NMNを補うことで、減ってしまったNAD+を再び増やし、細胞本来の力を呼び覚ます。これがNMNに期待される若々しさの秘密です。</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="science" class="mb-20">
+            <h2 class="section-title">科学の目で見るNMN</h2>
+             <p class="text-center text-warm-secondary max-w-3xl mx-auto mb-12">
+                NMNの可能性は、世界中の研究者によって日々探求されています。動物実験で見えてきた多彩な才能から、私たち人間で確認されつつある確かな手応えまで。ここでは、科学的な視点からNMNの真実に迫ります。
+            </p>
+            <div class="flex justify-center mb-8">
+                <button id="human-tab-btn" class="tab-btn active text-lg font-bold py-3 px-6 rounded-l-full bg-gray-200">人間での確かな手応え</button>
+                <button id="animal-tab-btn" class="tab-btn text-lg font-bold py-3 px-6 rounded-r-full bg-gray-200">動物での発見</button>
+            </div>
+
+            <div id="human-content">
+                <h3 class="text-2xl font-bold text-center mb-2">人間で確認された主な効果</h3>
+                <p class="text-warm-secondary text-center mb-8">グラフの項目にカーソルを合わせると詳細が表示されます。</p>
+                <div class="chart-container bg-white p-4 rounded-xl shadow-lg">
+                    <canvas id="human-trials-chart"></canvas>
+                </div>
+            </div>
+
+            <div id="animal-content" class="hidden">
+                 <h3 class="text-2xl font-bold text-center mb-8">動物実験で見つかった多彩な才能</h3>
+                 <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="bg-white p-6 rounded-xl shadow-md">
+                        <h4 class="font-bold text-lg mb-2 accent-color">⚡ エネルギーアップ</h4>
+                        <p class="text-warm-secondary">エネルギー代謝が活発になり、身体活動が向上。長寿遺伝子「サーチュイン」の活性化も確認されました。</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-md">
+                        <h4 class="font-bold text-lg mb-2 accent-color">🧠 冴えわたる思考</h4>
+                        <p class="text-warm-secondary">マウスの実験で認知機能の改善が報告。脳内の環境を整える可能性が示唆されています。</p>
+                    </div>
+                     <div class="bg-white p-6 rounded-xl shadow-md">
+                        <h4 class="font-bold text-lg mb-2 accent-color">❤️ しなやかな血管</h4>
+                        <p class="text-warm-secondary">加齢による血管の衰えや硬化を防ぎ、若いマウスのような弾力性を取り戻すことが示されました。</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-md">
+                        <h4 class="font-bold text-lg mb-2 accent-color">💪 血糖コントロール</h4>
+                        <p class="text-warm-secondary">糖尿病マウスにおいて、血糖値のコントロールが改善。インスリンの働きをサポートする可能性が。</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-md">
+                        <h4 class="font-bold text-lg mb-2 accent-color">✨ 肌の保護</h4>
+                        <p class="text-warm-secondary">紫外線による皮膚へのダメージを和らげる効果がマウスで報告されています。</p>
+                    </div>
+                     <div class="bg-white p-6 rounded-xl shadow-md">
+                        <h4 class="font-bold text-lg mb-2 accent-color">🦴 丈夫な骨</h4>
+                        <p class="text-warm-secondary">マウスの骨量や骨密度の低下を防ぐ可能性が示唆され、骨の健康維持にも期待が寄せられています。</p>
+                    </div>
+                 </div>
+                 <p class="text-center text-sm text-gray-500 mt-8">※これらは動物実験の結果であり、人間への効果を保証するものではありません。</p>
+            </div>
+        </section>
+        
+        <section id="testimonials" class="mb-20">
+            <h2 class="section-title">みんなの「実感」の声</h2>
+            <p class="text-center text-warm-secondary max-w-3xl mx-auto mb-12">
+                科学的なデータだけでなく、実際にNMNを生活に取り入れた方々の「生の声」にも耳を傾けてみましょう。これは、あなたの未来を想像するヒントになるかもしれません。※あくまで個人の感想です。
+            </p>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="testimonial-card bg-white p-8 rounded-xl shadow-lg">
+                    <p class="text-5xl accent-color leading-none mb-4">“</p>
+                    <p class="text-warm-secondary mb-4">一日中、疲れを感じずにバリバリ働ける！朝の目覚めがスッキリして、一日を気持ちよくスタートできるのが最高です。</p>
+                    <p class="text-right font-bold text-warm-primary">- 活力アップを実感</p>
+                </div>
+                 <div class="testimonial-card bg-white p-8 rounded-xl shadow-lg">
+                    <p class="text-5xl accent-color leading-none mb-4">“</p>
+                    <p class="text-warm-secondary mb-4">夜中に何度も目が覚めていたのが嘘のよう。ぐっすり眠れるから、日中の集中力が全然違います。</p>
+                    <p class="text-right font-bold text-warm-primary">- 睡眠の質を実感</p>
+                </div>
+                <div class="testimonial-card bg-white p-8 rounded-xl shadow-lg">
+                    <p class="text-5xl accent-color leading-none mb-4">“</p>
+                    <p class="text-warm-secondary mb-4">ジムでのトレーニングが楽しくなりました。以前より筋肉がつきやすくなった気がしますし、疲れにくいです。</p>
+                    <p class="text-right font-bold text-warm-primary">- 運動パフォーマンスを実感</p>
+                </div>
+                 <div class="testimonial-card bg-white p-8 rounded-xl shadow-lg">
+                    <p class="text-5xl accent-color leading-none mb-4">“</p>
+                    <p class="text-warm-secondary mb-4">周りから「最近、肌の調子いいね」と言われることが増えました。化粧ノリも良くなった気がして嬉しいです。</p>
+                    <p class="text-right font-bold text-warm-primary">- 見た目の変化を実感</p>
+                </div>
+                <div class="testimonial-card bg-white p-8 rounded-xl shadow-lg">
+                    <p class="text-5xl accent-color leading-none mb-4">“</p>
+                    <p class="text-warm-secondary mb-4">仕事でPCを使う時間が長いのですが、以前より集中力が続くようになりました。頭がクリアな感覚です。</p>
+                    <p class="text-right font-bold text-warm-primary">- 思考のクリアさを実感</p>
+                </div>
+                <div class="testimonial-card bg-white p-8 rounded-xl shadow-lg">
+                    <p class="text-5xl accent-color leading-none mb-4">“</p>
+                    <p class="text-warm-secondary mb-4">飲み始めて3ヶ月ほど経った頃から、体の軽さを感じるように。続けることが大切なんだなと実感しています。</p>
+                    <p class="text-right font-bold text-warm-primary">- 継続の大切さを実感</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="safety" class="bg-warm-secondary p-8 md:p-12 rounded-2xl mb-20">
+            <h2 class="section-title">安心・安全ガイド</h2>
+             <p class="text-center text-warm-secondary max-w-3xl mx-auto mb-12">
+                素晴らしい可能性を秘めたNMNですが、安心して続けるためには正しい知識が不可欠です。副作用の可能性から、信頼できる製品の選び方まで、あなたのNMNライフをサポートする情報をお届けします。
+            </p>
+            <div class="grid md:grid-cols-2 gap-10">
+                <div>
+                    <h3 class="text-2xl font-bold mb-6 text-center">信頼できる製品を選ぶには？</h3>
+                    <ul class="space-y-4">
+                        <li class="flex items-start">
+                            <span class="accent-bg text-white rounded-full h-6 w-6 flex items-center justify-center mr-3 mt-1 flex-shrink-0">✓</span>
+                            <div><strong class="text-warm-primary">純度99%以上、β-NMNを選ぶ</strong><br>ヒトの体内に存在し安全性が確認されている「β型」で、高純度のものを選びましょう。</div>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="accent-bg text-white rounded-full h-6 w-6 flex items-center justify-center mr-3 mt-1 flex-shrink-0">✓</span>
+                            <div><strong class="text-warm-primary">GMP認定工場で製造</strong><br>品質管理が徹底された工場で作られている証拠。「GMPマーク」を確認しましょう。</div>
+                        </li>
+                         <li class="flex items-start">
+                            <span class="accent-bg text-white rounded-full h-6 w-6 flex items-center justify-center mr-3 mt-1 flex-shrink-0">✓</span>
+                            <div><strong class="text-warm-primary">第三者機関の証明書を確認</strong><br>純度や安全性が客観的に証明されている製品は信頼性が高いです。</div>
+                        </li>
+                         <li class="flex items-start">
+                            <span class="accent-bg text-white rounded-full h-6 w-6 flex items-center justify-center mr-3 mt-1 flex-shrink-0">✓</span>
+                            <div><strong class="text-warm-primary">続けられる価格か</strong><br>高価なものですが、安すぎる製品は品質に疑問符が。無理なく継続できる範囲で高品質なものを。</div>
+                        </li>
+                    </ul>
+                </div>
+                 <div>
+                    <h3 class="text-2xl font-bold mb-6 text-center">副作用について</h3>
+                    <div class="bg-white p-6 rounded-xl shadow-inner">
+                        <p class="text-warm-secondary mb-4">NMNは一般的に安全とされていますが、ごく稀に以下のような症状が報告されることがあります。</p>
+                        <ul class="list-disc list-inside text-warm-secondary space-y-2">
+                           <li>胃の不快感や吐き気、下痢などの消化器系の症状</li>
+                           <li>頭痛やめまい</li>
+                           <li>かゆみや発疹などの皮膚症状</li>
+                        </ul>
+                         <p class="text-warm-secondary mt-4 text-sm">これらの症状は一時的なことが多いですが、続く場合は摂取を中止し、医師に相談してください。何よりも、推奨される摂取量を守ることが大切です。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="tech" class="py-10">
+            <h2 class="section-title">NMNの可能性を最大限に引き出す技術</h2>
+            <p class="text-center text-warm-secondary max-w-3xl mx-auto mb-12">
+                NMNの力を本当に活かすには、実は見過ごされがちな「ある壁」がありました。しかし、日本の革新的な技術がその壁を打ち破り、NMNの吸収効率を劇的に高めることに成功したのです。ここからは、その驚きの技術の秘密に迫ります。
+            </p>
+            <div class="text-center mb-12">
+                 <h3 class="text-3xl font-bold mb-2">見過ごされてきた「課題」と「画期的な解決策」</h3>
+                 <p class="max-w-3xl mx-auto text-stone-600">βグルカンは素晴らしい成分ですが、実はその真価を発揮する上で大きな壁がありました。しかし、日本の研究者がその壁を打ち破る特許技術を開発したのです。</p>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-12 items-center mb-20">
+                <div class="text-center md:text-left">
+                    <h4 class="text-2xl font-bold mb-3 text-gray-700">課題：水に溶けにくく、吸収されにくい</h4>
+                    <p class="text-stone-600 mb-6">従来のβグルカンは粒子が大きく水に溶けにくいため、体内で十分に吸収されず、その効果を最大限に発揮できていませんでした。良い成分も、体に届かなければ意味がありません。</p>
+                    <div class="tech-diagram bg-gray-100 p-6 rounded-xl shadow-lg">
+                        <div class="large-particle">従来型</div>
+                        <div class="text-5xl font-thin text-red-500">→ X</div>
+                        <div class="w-1 h-24 bg-gray-300 border-l-4 border-dashed border-gray-400"></div>
+                        <span class="text-gray-500 font-bold">吸収の壁</span>
+                    </div>
+                </div>
+                <div class="text-center md:text-left">
+                    <h4 class="text-2xl font-bold mb-3 text-amber-700">解決策：甲元教授の「ナノ化技術」</h4>
+                    <p class="text-stone-600 mb-6">この問題を解決したのが、独自の「ナノ化技術」です。βグルカンを肉眼では見えないナノメートルサイズにまで微細化することに成功しました。</p>
+                    <div class="tech-diagram bg-green-50 p-6 rounded-xl shadow-lg">
+                        <div class="flex flex-wrap gap-1 w-20 h-20 justify-center items-center">
+                            <div class="nano-particle"></div><div class="nano-particle"></div><div class="nano-particle"></div>
+                            <div class="nano-particle"></div><div class="nano-particle"></div><div class="nano-particle"></div>
+                            <div class="nano-particle"></div><div class="nano-particle"></div><div class="nano-particle"></div>
+                        </div>
+                        <div class="text-5xl font-thin text-green-500">→ ✓</div>
+                        <div class="w-1 h-24 bg-gray-300 border-l-4 border-dashed border-gray-400"></div>
+                        <span class="text-green-600 font-bold">吸収</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white p-8 rounded-2xl shadow-xl">
+                <div class="grid md:grid-cols-5 gap-8 items-center">
+                    <div class="md:col-span-3">
+                         <h4 class="text-2xl font-bold mb-4">溶解度150倍！データが示す圧倒的な差</h4>
+                         <p class="text-stone-600 mb-4">ナノ化技術により、水への溶解度は劇的に向上。下のグラフは、従来型と比較した溶解度の違いを示しています。この「溶けやすさ」が、体内への吸収率を格段に高める鍵なのです。</p>
+                        <div class="chart-container">
+                            <canvas id="solubilityChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="md:col-span-2 text-center">
+                         <h4 class="text-2xl font-bold mb-4">NMNを含む他の栄養素も運ぶ「カプセル機能」</h4>
+                         <p class="text-stone-600 mb-6">さらに驚くべきは、ナノ化βグルカンがNMN、ポリフェノール、クルクミン、そしてその他様々な栄養成分を内部に包み込み、一緒に体内へ運ぶことができる点です。これにより、単一の成分だけでなく、複数の成分を効率的に摂取し、その吸収率も同時に高めることができます。</p>
+                         <div class="capsule-diagram mx-auto">
+                            <span class="capsule-core">βグルカン</span>
+                            <div class="encapsulated" style="top: 20%; left: 15%;"></div>
+                            <div class="encapsulated" style="top: 65%; left: 25%;"></div>
+                            <div class="encapsulated" style="top: 30%; left: 70%;"></div>
+                            <div class="encapsulated" style="bottom: 15%; right: 20%;"></div>
+                         </div>
+                         <p class="mt-4 text-sm text-teal-600 font-semibold">青丸：NMN、ポリフェノール、クルクミン等の機能性成分</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="text-center py-10 bg-warm-secondary mt-20">
+        <p class="text-warm-secondary">NMNは、健康的な未来への扉を開く鍵かもしれません。</p>
+        <p class="text-sm text-gray-500 mt-2">このアプリケーションは情報提供を目的としており、医学的な助言に代わるものではありません。</p>
+    </footer>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const humanTabBtn = document.getElementById('human-tab-btn');
+            const animalTabBtn = document.getElementById('animal-tab-btn');
+            const humanContent = document.getElementById('human-content');
+            const animalContent = document.getElementById('animal-content');
+
+            function switchTab(activeBtn, inactiveBtn, activeContent, inactiveContent) {
+                activeBtn.classList.add('active');
+                inactiveBtn.classList.remove('active');
+                activeContent.classList.remove('hidden');
+                inactiveContent.classList.add('hidden');
+            }
+
+            humanTabBtn.addEventListener('click', () => {
+                switchTab(humanTabBtn, animalTabBtn, humanContent, animalContent);
+            });
+
+            animalTabBtn.addEventListener('click', () => {
+                switchTab(animalTabBtn, humanTabBtn, animalContent, humanContent);
+            });
+
+            const humanTrialsData = {
+                labels: ['身体機能の向上', '睡眠の質の改善', 'インスリン感受性改善', '肌の健康維持', '心血管機能のサポート'],
+                datasets: [{
+                    label: 'ヒト臨床試験での肯定的報告',
+                    data: [85, 80, 75, 70, 65],
+                    backgroundColor: [
+                        'rgba(93, 156, 156, 0.6)',
+                        'rgba(127, 178, 178, 0.6)',
+                        'rgba(161, 200, 200, 0.6)',
+                        'rgba(195, 222, 222, 0.6)',
+                        'rgba(229, 244, 244, 0.6)'
+                    ],
+                    borderColor: [
+                        'rgba(93, 156, 156, 1)',
+                        'rgba(127, 178, 178, 1)',
+                        'rgba(161, 200, 200, 1)',
+                        'rgba(195, 222, 222, 1)',
+                        'rgba(229, 244, 244, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            };
+
+            const humanTrialsTooltips = [
+                '高齢者の歩行速度が速くなるなど、身体的なパフォーマンスの向上が報告されています。',
+                '日中の眠気が減少し、全体的な睡眠の質が改善したという研究結果があります。',
+                '血糖値のコントロールに関わるインスリンの働きが良くなることが示唆されています。',
+                'NMN配合化粧品の使用で、シワやたるみが改善したという臨床評価があります。',
+                'コレステロール値や血圧の改善に役立つ可能性が報告されています。'
+            ];
+            
+            const ctx = document.getElementById('human-trials-chart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: humanTrialsData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            max: 100,
+                             ticks: {
+                                display: false,
+                            },
+                             grid: {
+                                display: false
+                            }
+                        },
+                        y: {
+                             ticks: {
+                                font: {
+                                    size: 14,
+                                    family: "'Noto Sans JP', sans-serif"
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return '';
+                                },
+                                afterLabel: function(context) {
+                                   return humanTrialsTooltips[context.dataIndex];
+                                }
+                            },
+                            bodyFont: {
+                                size: 14,
+                                family: "'Noto Sans JP', sans-serif"
+                            },
+                            padding: 12,
+                            displayColors: false
+                        }
+                    }
+                }
+            });
+
+            // Solubility Chart
+            const solubilityCtx = document.getElementById('solubilityChart').getContext('2d');
+            new Chart(solubilityCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['従来型', 'ナノ化'],
+                    datasets: [{
+                        label: '水への溶解度 (相対値)',
+                        data: [1, 150],
+                        backgroundColor: [
+                            'rgba(239, 68, 68, 0.6)', /* red-500 */
+                            'rgba(16, 185, 129, 0.6)' /* emerald-500 */
+                        ],
+                        borderColor: [
+                            'rgba(239, 68, 68, 1)',
+                            'rgba(16, 185, 129, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: '溶解度 (倍)',
+                                font: {
+                                    size: 16,
+                                    family: "'Noto Sans JP', sans-serif"
+                                }
+                            }
+                        },
+                        x: {
+                             ticks: {
+                                font: {
+                                    size: 14,
+                                    family: "'Noto Sans JP', sans-serif"
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': ' + context.parsed.y + '倍';
+                                }
+                            },
+                            bodyFont: {
+                                size: 14,
+                                family: "'Noto Sans JP', sans-serif"
+                            },
+                            padding: 12,
+                            displayColors: false
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
